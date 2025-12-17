@@ -37,6 +37,8 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+	testRuntimeOnly 'com.h2database:h2'
 }
 
 compileJava {
@@ -45,4 +47,8 @@ compileJava {
 
 compileTestJava {
 	options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
 }
