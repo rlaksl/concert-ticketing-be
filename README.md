@@ -24,14 +24,22 @@
 
 ---
 
-## 데이터베이스 스키마 명세
+## 데이터베이스 설계 (ERD)
+
+<img width="500" height="auto" alt="image" src="https://github.com/user-attachments/assets/54d26855-bea3-4465-a536-4e703cf1727c" />
+
+---
+
+## 데이터베이스 상세 명
 
 ### 1. `users` (사용자)
 | 컬럼명 | 타입 | 제약 조건 | 설명 |
 | :--- | :--- | :--- | :--- |
 | **id** | `BIGINT` | PK, AI | 사용자 ID |
 | **email** | `VARCHAR(100)` | UQ, Not Null | 로그인 이메일 |
-| **password** | `VARCHAR(255)` | Not Null | 비밀번호 |
+| **password** | `VARCHAR(255)` | Not Null | 암호화된 비밀번호 |
+| **name** | `VARCHAR(50)` | Not Null | 사용자 이름 |
+| **phone** | `VARCHAR(20)` | UQ, Not Null | 전화번호 (중복 가입 방지) |
 | **created_at** | `DATETIME` | Default | 가입 일시 |
 
 ### 2. `concerts` (공연 정보)
