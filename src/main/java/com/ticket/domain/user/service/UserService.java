@@ -48,5 +48,14 @@ public class UserService {
 
         // 응답 반환
         return SignUpResponse.from(savedUser);
+
+    }
+
+    public boolean isEmailDuplicate(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public boolean isPhoneDuplicate(String phone) {
+        return userRepository.existsByPhone(phone);
     }
 }

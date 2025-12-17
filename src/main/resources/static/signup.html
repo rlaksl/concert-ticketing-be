@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>회원가입</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body>
+    <div class="container">
+        <h2>회원가입</h2>
+        <form id="signupForm">
+            <div class="input-group">
+                <label for="email">이메일</label>
+                <div class="input-with-btn">
+                    <input type="email" id="email" placeholder="example@email.com" required/>
+                    <button type="button" id="checkEmailBtn">중복확인</button>
+                </div>
+                <span class="error-message" id="emailError"></span>
+            </div>
+            <div class="input-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" placeholder="8자 이상 20자 이하" required/>
+                <span class="error-message" id="passwordError"></span>
+            </div>
+            <div class="input-group">
+                <label for="name">이름</label>
+                <input type="text" id="name" placeholder="홍길동" required/>
+                <span class="error-message" id="nameError"></span>
+            </div>
+            <div class="input-group">
+                <label for="phone">전화번호</label>
+                <div class="input-with-btn">
+                    <input type="tel" id="phone" placeholder="010-1234-5678" required/>
+                    <button type="button" id="checkPhoneBtn">중복확인</button>
+                </div>
+                <span class="error-message" id="phoneError"></span>
+            </div>
+            <button type="submit">가입하기</button>
+        </form>
+        <div class="link-group">
+            <span>이미 계정이 있으신가요?</span>
+            <a href="/login.html">로그인</a>
+        </div>
+    </div>
+
+    <script src="/js/signup.js"></script>
+</body>
+</html>

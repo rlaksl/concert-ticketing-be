@@ -7,10 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -19,9 +16,25 @@ public class UserController {
 
     private final UserService userService;
 
+    // 회원가입 API
+    // 요청 주소: POST /api/users/signup
     @PostMapping("/signup")
     public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest request) {
         SignUpResponse response = userService.signUp(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // 이메일 중복 확인
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmailDuplicate(@RequestParam String email) {
+        boolean isDuplicate = userService.isEmailDuplicate(email);
+        return ResponseEntity.ok(isDuplicate);
+    }
+
+    // 전화번호 중복 확인
+    @GetMapping("/check-phone")
+    public ResponseEntity<Boolean> checkPhoneDuplicate(@RequestParam String phone) {
+        boolean isDuplicate = userService.isPhoneDuplicate(phone);
+        return ResponseEntity.ok(isDuplicate);
     }
 }
