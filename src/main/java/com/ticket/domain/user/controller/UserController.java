@@ -37,4 +37,10 @@ public class UserController {
         boolean isDuplicate = userService.isPhoneDuplicate(phone);
         return ResponseEntity.ok(isDuplicate);
     }
+
+    // 내 정보 조회 (인증 필요)
+    @GetMapping("/me")
+    public ResponseEntity<String> getMyInfo() {
+        return ResponseEntity.ok("인증된 사용자입니다!");
+    }
 }

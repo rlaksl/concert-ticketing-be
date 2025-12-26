@@ -1,0 +1,35 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background-color: #fff;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.container h2 {
+    margin-bottom: 20px;
+}
+
+.container p {
+    margin-bottom: 30px;
+    color: #666;
+}
+
+#logoutBtn {
+    padding: 12px 30px;
+    background-color: #dc3545;
+    color: #fff;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+#logoutBtn:hover {
+    background-color: #c82333;
+}
