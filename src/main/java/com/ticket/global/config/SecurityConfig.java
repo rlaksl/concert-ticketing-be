@@ -36,6 +36,10 @@ public class SecurityConfig {
                                 "/api/users/check-phone",
                                 "/api/auth/login"
                         ).permitAll()
+                        // 공연, 일정, 좌석 조회는 비로그인도 가능
+                        .requestMatchers("/api/concerts/**").permitAll()
+                        .requestMatchers("/api/seats/schedule/**").permitAll()
+
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         .requestMatchers("/signup.html", "/login.html", "/main.html").permitAll()
