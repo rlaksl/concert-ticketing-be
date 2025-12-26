@@ -37,7 +37,21 @@ window.onload = async function() {
 };
 
 // 로그아웃 버튼
-document.getElementById('logoutBtn').addEventListener('click', function() {
+document.getElementById('logoutBtn').addEventListener('click', async function() {
+    const accessToken = localStorage.getItem('accessToken');
+
+    try {
+        // 서버에 로그아웃 요청 (레디스 토큰 삭제)
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + accessToken
+            }
+        });
+    } catch (error) {
+        console.error('로그아웃 API 호출 실패: ', error);
+    }
+    // 로컬 토큰 삭제 후 이동
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     alert('로그아웃 되었습니다.');

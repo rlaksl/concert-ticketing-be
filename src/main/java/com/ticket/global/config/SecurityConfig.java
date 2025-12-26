@@ -34,7 +34,7 @@ public class SecurityConfig {
                                 "/api/users/signup",
                                 "/api/users/check-email",
                                 "/api/users/check-phone",
-                                "/api/auth/**"
+                                "/api/auth/login"
                         ).permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
