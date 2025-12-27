@@ -3,29 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>콘서트 티켓 예매</title>
+    <title>공연 상세</title>
     <link rel="stylesheet" href="/css/base.css">
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/concert-detail.css">
 </head>
 <body>
     <!-- 헤더 -->
     <header class="header">
         <div class="header-inner">
             <a href="/main.html" class="logo">🎫 TicketBook</a>
-            <nav class="nav" id="nav">
-                <!-- JS로 로그인 상태에 따라 변경 -->
-            </nav>
+            <nav class="nav" id="nav"></nav>
         </div>
     </header>
 
     <!-- 메인 콘텐츠 -->
     <main class="main-content">
-        <h1>공연 목록</h1>
-        <div class="concert-list" id="concertList">
-            <!-- JS로 콘서트 카드 삽입 -->
+        <div class="concert-info" id="concertInfo">
+            <!-- JS로 공연 정보 삽입 -->
+        </div>
+
+        <h2>공연 일정</h2>
+        <div class="schedule-list" id="scheduleList">
+            <!-- JS로 일정 목록 삽입 -->
         </div>
     </main>
 
-<script src="/js/main.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/concert-detail.js"></script>
 </body>
 </html>

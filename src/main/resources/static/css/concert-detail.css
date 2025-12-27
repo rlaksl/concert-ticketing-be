@@ -1,0 +1,117 @@
+/* 기본 레이아웃 */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 헤더 */
+.header {
+    background-color: #333;
+    color: #fff;
+    padding: 0 20px;
+}
+
+.header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+}
+
+.logo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.nav a {
+    color: #fff;
+    margin-left: 20px;
+}
+
+.nav a:hover {
+    text-decoration: underline;
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* 공연 정보 */
+.concert-info {
+    background-color: #fff;
+    padding: 30px;
+    margin-bottom: 40px;
+}
+
+.concert-info h1 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.concert-info .artist {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* 일정 목록 */
+.main-content h2 {
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.schedule-card {
+    background-color: #fff;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.schedule-card .date-info {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.schedule-card .seat-info {
+    color: #666;
+    margin-top: 6px;
+    font-size: 0.95rem;
+}
+
+.schedule-card .btn-reserve {
+    padding: 10px 24px;
+    background-color: #333;
+    color: #fff;
+    font-weight: 500;
+}
+
+.schedule-card .btn-reserve:hover {
+    background-color: #555;
+}
+
+.schedule-card .btn-reserve:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* 메시지 */
+.message {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}

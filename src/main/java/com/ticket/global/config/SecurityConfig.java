@@ -40,10 +40,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/concerts/**").permitAll()
                         .requestMatchers("/api/seats/schedule/**").permitAll()
 
+                        // WebSocket 엔드포인트 허용 추가
+                        .requestMatchers("/ws/**").permitAll()
+
+                        // 테스트용 임시 허용 (테스트 후 삭제 예정)
+                        //.requestMatchers("/api/seats/*/reserve").permitAll()
+
+                        // 테스트용 API 허용 (테스트 후 삭제 예정)
+                        //.requestMatchers("/api/test/**").permitAll()
+
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        .requestMatchers("/signup.html", "/login.html", "/main.html").permitAll()
-                        .requestMatchers("/css/**", "/js/**").permitAll()
+                        .requestMatchers("/*.html","/css/**", "/js/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

@@ -72,10 +72,10 @@ class SeatConcurrencyTest {
     }
 
     @Test
-    @DisplayName("1000명이 동시에 같은 좌석 예약 시 1명만 성공")
+    @DisplayName("10000명이 동시에 같은 좌석 예약 시 1명만 성공")
     void concurrentReservation_onlyOneSucceeds() throws InterruptedException {
         // given - 테스트 환경 설정
-        int threadCount = 1000;
+        int threadCount = 10000;
 
         // ExecutorService: 스레드 풀 생성 (최대 32개 스레드가 동시 실행)
         ExecutorService executorService = Executors.newFixedThreadPool(32);
@@ -117,7 +117,7 @@ class SeatConcurrencyTest {
 
         // 1명만 성공
         assertThat(successCount.get()).isEqualTo(1);
-        assertThat(failCount.get()).isEqualTo(999);
+        assertThat(failCount.get()).isEqualTo(9999);
 
         // 좌석 상태가 TEMPORARY로 변경되었는지 확인
         Seat seat = seatRepository.findById(testSeatId).orElseThrow();
