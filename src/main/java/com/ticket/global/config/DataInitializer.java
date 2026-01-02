@@ -82,6 +82,54 @@ public class DataInitializer implements CommandLineRunner{
             );
         }
 
+        // 공연 3: 아이유 콘서트
+        Concert concert3 = concertRepository.save(
+                Concert.builder()
+                        .title("2026 아이유 콘서트")
+                        .artist("아이유")
+                        .build()
+        );
+
+        // 일정 3-1: 2026.02.18 오후 4시 (예매 오픈: 2025.12.25 오후 8시)
+        ConcertSchedule schedule3_1 = scheduleRepository.save(
+                ConcertSchedule.builder()
+                        .concert(concert3)
+                        .concertAt(LocalDateTime.of(2026, 2, 18, 16, 0))
+                        .bookingAvailableAt(LocalDateTime.of(2025, 12, 25, 20, 0))
+                        .totalSeats(10000)
+                        .build()
+        );
+
+        for (int i = 1; i <= 10000; i++) {
+            seatRepository.save(
+                    Seat.builder()
+                            .schedule(schedule3_1)
+                            .seatNo(i)
+                            .price(150000)
+                            .build()
+            );
+        }
+
+        // 일정 3-2: 2026.02.19 오후 6시 (예매 오픈: 2025.12.25 오후 8시)
+        ConcertSchedule schedule3_2 = scheduleRepository.save(
+                ConcertSchedule.builder()
+                        .concert(concert3)
+                        .concertAt(LocalDateTime.of(2026, 2, 19, 18, 0))
+                        .bookingAvailableAt(LocalDateTime.of(2025, 12, 25, 20, 0))
+                        .totalSeats(10000)
+                        .build()
+        );
+
+        for (int i = 1; i <= 10000; i++) {
+            seatRepository.save(
+                    Seat.builder()
+                            .schedule(schedule3_2)
+                            .seatNo(i)
+                            .price(150000)
+                            .build()
+            );
+        }
+
         System.out.println("테스트 데이터 초기화 완료!");
     }
 }

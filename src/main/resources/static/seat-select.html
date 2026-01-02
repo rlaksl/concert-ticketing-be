@@ -11,36 +11,47 @@
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
-<!-- 헤더 -->
-<header class="header">
-    <div class="header-inner">
-        <a href="/main.html" class="logo">🎫 TicketBook</a>
-        <nav class="nav" id="nav"></nav>
-    </div>
-</header>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header-inner">
+            <a href="/main.html" class="logo">🎫 TicketBook</a>
+            <nav class="nav" id="nav"></nav>
+        </div>
+    </header>
 
-<!-- 메인 콘텐츠 -->
-<main class="main-content">
-    <h1>좌석 선택</h1>
+    <!-- 메인 콘텐츠 -->
+    <main class="main-content">
+        <div class="concert-info-section" id="concertInfoSection">
+            <div class="concert-header">
+                <h1 id="concertTitle">로딩중...</h1>
+                <div class="schedule-selector">
+                    <select id="scheduleDropdown" class="schedule-dropdown">
+                        <!-- JS로 옵션 삽입 -->
+                    </select>
+                </div>
+            </div>
+        </div>
 
-    <!-- 범례 -->
-    <div class="legend">
-        <span class="legend-item"><span class="seat-box available"></span> 선택 가능</span>
-        <span class="legend-item"><span class="seat-box selected"></span> 선택한 좌석</span>
-    </div>
+        <h2>좌석 선택</h2>
 
-    <!-- 좌석 목록 -->
-    <div class="seat-container" id="seatContainer">
-        <!-- JS로 좌석 삽입 -->
-    </div>
+        <!-- 범례 -->
+        <div class="legend">
+            <span class="legend-item"><span class="seat-box available"></span> 선택 가능</span>
+            <span class="legend-item"><span class="seat-box selected"></span> 선택한 좌석</span>
+        </div>
 
-    <!-- 선택된 좌석 정보 -->
-    <div class="selection-info" id="selectionInfo" style="display: none;">
-        <p>선택한 좌석: <span id="selectedSeatNo"></span></p>
-        <p>가격: <span id="selectedPrice"></span>원</p>
-        <button id="reserveBtn" class="btn-reserve">예약하기</button>
-    </div>
-</main>
+        <!-- 좌석 목록 -->
+        <div class="seat-container" id="seatContainer">
+            <!-- JS로 좌석 삽입 -->
+        </div>
+
+        <!-- 선택된 좌석 정보 -->
+        <div class="selection-info" id="selectionInfo" style="display: none;">
+            <p>선택한 좌석: <span id="selectedSeatNo"></span></p>
+            <p>가격: <span id="selectedPrice"></span>원</p>
+            <button id="reserveBtn" class="btn-reserve">예약하기</button>
+        </div>
+    </main>
 
 <script src="/js/common.js"></script>
 <script src="/js/seat-select.js"></script>

@@ -1,5 +1,6 @@
 package com.ticket.domain.seat.service;
 
+import com.ticket.domain.queue.service.QueueService;
 import com.ticket.domain.seat.dto.SeatMessage;
 import com.ticket.domain.seat.entity.Seat;
 import com.ticket.domain.seat.entity.SeatStatus;
@@ -21,17 +22,30 @@ public class SeatService {
 
     private final SeatRepository seatRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final QueueService queueService; // 대가열
 
     // 특정 일정의 모든 좌석 조회
     public List<Seat> getSeatsBySchedule(Long scheduleId) {
         return seatRepository.findByScheduleIdOrderBySeatNoAsc(scheduleId);
     }
 
-    // 좌석 예약 (동시성 제어)
+    // 좌석 예약 (동시성 제어 + 토큰 검증)
     @Transactional
-    public Seat reserveSeat(Long seatId, Long userId) {
+    public Seat reserveSeat(Long seatId, Long userId, String entryToken) {
         Seat seat = seatRepository.findById(seatId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
+
+        Long scheduleId = seat.getSchedule().getId();
+
+        // 입장 토큰 검증
+        if (!queueService.validateEntryToken(scheduleId, userId, entryToken)) {
+            throw new CustomException(ErrorCode.INVALID_ENTRY_TOKEN);
+        }
+
+        // 예매 오픈 시간 검증 추가
+        if (!seat.getSchedule().isBookingAvailable()) {
+            throw new CustomException(ErrorCode.BOOKING_NOT_AVAILABLE);
+        }
 
         // 상태 체크 추가
         if (seat.getStatus() != SeatStatus.AVAILABLE) {
@@ -63,6 +77,10 @@ public class SeatService {
         }
 
         seat.confirmSold();
+
+        // 결제 완료 시 대기열에서 이탈 처리
+        Long scheduleId = seat.getSchedule().getId();
+        queueService.exitQueue(scheduleId, userId);
 
         // WebSocket 브로드캐스트 추가
         broadcastSeatUpdate(seat, "CONFIRM");

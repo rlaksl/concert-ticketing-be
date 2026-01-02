@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대기열</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/queue.css">
+    <!-- WebSocket 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header-inner">
+            <a href="/main.html" class="logo">🎫 TicketBook</a>
+            <nav class="nav" id="nav"></nav>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main-content">
+        <div class="queue-container">
+            <h1>대기 중</h1>
+
+            <div class="queue-info">
+                <div class="position-display">
+                    <span class="label">내 순번</span>
+                    <span class="position" id="myPosition">-</span>
+                </div>
+
+                <div class="waiting-display">
+                    <span class="label">총 대기 인원</span>
+                    <span class="total" id="totalWaiting">-</span>
+                </div>
+            </div>
+
+            <div class="estimated-time">
+                <span>예상 대기 시간: </span>
+                <span id="estimatedTime">계산 중...</span>
+            </div>
+
+            <div class="queue-message" id="queueMessage">
+                순번이 되면 자동으로 좌석 선택 페이지로 이동합니다.
+            </div>
+
+            <div class="loading-spinner" id="spinner">
+                <div class="spinner"></div>
+            </div>
+
+            <button class="btn-exit" id="exitBtn">대기열 나가기</button>
+        </div>
+    </main>
+
+<script src="/js/common.js"></script>
+<script src="/js/queue.js"></script>
+</body>
+</html>

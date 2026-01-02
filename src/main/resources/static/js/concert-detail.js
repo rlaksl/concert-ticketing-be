@@ -55,9 +55,9 @@ async function loadConcertDetail() {
                         <p class="seat-info">총 ${schedule.totalSeats.toLocaleString()}석</p>
                     </div>
                     <button class="btn-reserve" 
-                            onclick="goToSeatSelect(${schedule.id})"
+                            onclick="handleReserveClick(${schedule.id})"
                             ${!isAvailable ? 'disabled' : ''}>
-                        ${isAvailable ? '예매하기' : '예매 준비중'}
+                        ${isAvailable ? '예매하기' : formatOpenDate(bookingDate) + ' 오픈 예정'}
                     </button>
                 </div>
             `;
@@ -80,7 +80,65 @@ function formatDate(date) {
     return `${year}.${month}.${day} ${hours}:${minutes}`;
 }
 
-// 좌석 선택 페이지로 이동
-function goToSeatSelect(scheduleId) {
-    location.href = `/seat-select.html?scheduleId=${scheduleId}`;
+// 오픈 날짜 포맷
+function formatOpenDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    let hours = date.getHours();
+    const period = hours < 12 ? '오전' : '오후';
+    if (hours > 12) hours -= 12;
+    if (hours === 0) hours = 12;
+
+    return `${year}.${month}.${day} ${period} ${hours}시`;
+}
+
+async function handleReserveClick(scheduleId) {
+    // 로그인 확인
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        location.href = '/login.html';
+        return;
+    }
+
+    try {
+        // 대기열 등록 API 호출
+        const response = await fetch('/api/queue/enter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + accessToken
+            },
+            body: JSON.stringify({ scheduleId: scheduleId })
+        });
+
+        if (response.status === 401) {
+            alert('로그인이 만료되었습니다.');
+            location.href = '/login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || '대기열 등록 실패');
+        }
+
+        const data = await response.json();
+
+        // READY 상태 → 바로 좌석 선택 페이지로
+        if (data.status === 'READY') {
+            localStorage.setItem('entryToken_' + scheduleId, data.entryToken);
+            location.href = `/seat-select.html?scheduleId=${scheduleId}`;
+            return;
+        }
+
+        // WAITING 상태 → 대기열 페이지로
+        location.href = `/queue.html?scheduleId=${scheduleId}`;
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || '예매 처리 중 오류가 발생했습니다.');
+    }
 }

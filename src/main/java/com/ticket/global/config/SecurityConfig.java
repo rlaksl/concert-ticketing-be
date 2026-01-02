@@ -39,6 +39,7 @@ public class SecurityConfig {
                         // 공연, 일정, 좌석 조회는 비로그인도 가능
                         .requestMatchers("/api/concerts/**").permitAll()
                         .requestMatchers("/api/seats/schedule/**").permitAll()
+                        .requestMatchers("/api/schedules/**").permitAll()
 
                         // WebSocket 엔드포인트 허용 추가
                         .requestMatchers("/ws/**").permitAll()

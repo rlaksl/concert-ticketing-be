@@ -1,5 +1,7 @@
 let selectedSeat = null;  // 현재 선택된 좌석
-let otherSelectedSeats = new Set();  // 다른 사용자가 선택 중인 좌석 ID
+let otherSelectedSeats = new Set(); // 다른 사용자가 선택 중인 좌석 ID
+let currentScheduleId = null; // 현재 일정 ID
+let entryToken = null;
 
 // 웹소켓 연결
 let stompClient = null;
@@ -82,13 +84,86 @@ window.addEventListener('beforeunload', function() {
 
 window.onload = function() {
     updateNav();
-    loadSeats();
+    loadScheduleInfo();
 };
 
 // URL에서 일정 ID 추출
 function getScheduleId() {
     const params = new URLSearchParams(window.location.search);
     return params.get('scheduleId');
+}
+
+// 일정 정보 로드 (공연 정보 + 드롭다운)
+async function loadScheduleInfo() {
+    const scheduleId = getScheduleId();
+    currentScheduleId = scheduleId;
+
+    if (!scheduleId) {
+        alert('잘못된 접근입니다.');
+        location.href = '/main.html';
+        return;
+    }
+
+    // 토큰 확인
+    entryToken = localStorage.getItem('entryToken_' + scheduleId);
+    if (!entryToken) {
+        alert('입장 권한이 없습니다. 대기열에 등록해주세요.');
+        location.href = `/queue.html?scheduleId=${scheduleId}`;
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/schedules/${scheduleId}`);
+        if (!response.ok) throw new Error('일정 정보를 불러오지 못했습니다.');
+
+        const data = await response.json();
+
+        // 공연 제목 표시
+        document.getElementById('concertTitle').textContent = data.concert.title;
+
+        // 드롭다운 옵션 생성
+        const dropdown = document.getElementById('scheduleDropdown');
+        dropdown.innerHTML = data.otherSchedules.map(schedule => {
+            const isSelected = schedule.scheduleId == scheduleId;
+            const dateText = formatScheduleDate(new Date(schedule.concertAt));
+            const statusText = schedule.isBookingAvailable ? '' : ' (예매 준비중)';
+
+            return `
+                <option value="${schedule.scheduleId}" 
+                        ${isSelected ? 'selected' : ''}
+                        ${!schedule.isBookingAvailable ? 'disabled' : ''}>
+                    ${dateText}${statusText}
+                </option>
+            `;
+        }).join('');
+
+        // 드롭다운 변경 이벤트
+        dropdown.addEventListener('change', function() {
+            const newScheduleId = this.value;
+            location.href = `/seat-select.html?scheduleId=${newScheduleId}`;
+        });
+
+        // 좌석 로드
+        loadSeats();
+
+    } catch (error) {
+        console.error(error);
+        document.getElementById('concertTitle').textContent = '정보를 불러올 수 없습니다.';
+    }
+}
+
+// 일정 날짜 포맷 (드롭다운용)
+function formatScheduleDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    let hours = date.getHours();
+    const period = hours < 12 ? '오전' : '오후';
+    if (hours > 12) hours -= 12;
+    if (hours === 0) hours = 12;
+
+    return `${year}.${month}.${day} ${period} ${hours}시`;
 }
 
 // 좌석 목록 로드
@@ -205,13 +280,21 @@ async function reserveSeat(seatId) {
         const response = await fetch(`/api/seats/${seatId}/reserve`, {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer ' + accessToken
+                'Authorization': 'Bearer ' + accessToken,
+                'X-Entry-Token': entryToken
             }
         });
 
         if (response.status === 401) {
             alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
             location.href = '/login.html';
+            return;
+        }
+
+        if (response.status === 403) {
+            alert('입장 권한이 만료되었습니다. 대기열에 다시 등록해주세요.');
+            localStorage.removeItem('entryToken_' + currentScheduleId);
+            location.href = `/queue.html?scheduleId=${currentScheduleId}`;
             return;
         }
 

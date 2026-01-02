@@ -23,12 +23,13 @@ public class SeatController {
         return ResponseEntity.ok(seatService.getSeatsBySchedule(scheduleId));
     }
 
-    // 좌석 예약 (로그인 필요)
+    // 좌석 예약 (로그인 필요 + 입장 토큰 필요)
     @PostMapping("/{seatId}/reserve")
     public ResponseEntity<Seat> reserveSeat(
             @PathVariable Long seatId,
+            @RequestHeader("X-Entry-Token") String entryToken,  // 추가
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(seatService.reserveSeat(seatId, userDetails.getId()));
+        return ResponseEntity.ok(seatService.reserveSeat(seatId, userDetails.getId(), entryToken));
     }
 
     // 결제 완료 (로그인 필요)
