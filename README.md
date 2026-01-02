@@ -7,7 +7,7 @@
 ## 프로젝트 개요 및 목표
 
 * **주요 목표:** 티켓팅과 같이 단시간에 대량의 요청이 발생하는 상황에서, **데이터의 정합성(Consistency)을 유지**하며 안전하게 좌석을 점유하고 판매하는 로직 구현.
-* **핵심 기능:** 좌석 동시성 제어(Optimistic Locking), 중복 로그인 방지, 예매 시작 시간 기반의 버튼 통제 로직 구현.
+* **핵심 기능:** 좌석 동시성 제어(Optimistic Locking), Redis 기반 대기열 시스템, 중복 로그인 방지, 예매 시작 시간 기반의 버튼 통제 로직 구현.
 
 ### 개발 기간
 * 2025.12.15 - (진행 중 | 개인 프로젝트)
@@ -27,8 +27,9 @@
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![H2](https://img.shields.io/badge/H2-0000BB?style=for-the-badge&logo=h2&logoColor=white)
 
-### Authentication
+### Authentication & Real-time
 ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![WebSocket](https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
 
 ### DevOps & Tools
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
@@ -42,27 +43,68 @@
 ### 1. 좌석 동시성 제어 (Optimistic Locking)
 - JPA `@Version`을 활용한 낙관적 락킹 구현
 - 동시에 같은 좌석 예약 시도 시 1명만 성공, 나머지는 실패 처리
-- **10,000명 동시 요청 테스트 통과**
+- **19,000명 동시 요청 테스트 통과**
 
-### 2. JWT 기반 인증 시스템
+### 2. Redis 기반 대기열 시스템
+- Redis Sorted Set을 활용한 순번 관리
+- 동시 입장 인원 제한 (기본 1,000명)
+- 입장 토큰 발급 및 검증 (TTL 5분)
+- 스케줄러 기반 자동 입장 처리 (1초 간격)
+- WebSocket을 통한 실시간 순번 업데이트
+
+### 3. JWT 기반 인증 시스템
 - Access Token / Refresh Token 분리 발급
 - Redis를 활용한 토큰 저장 및 관리
 - BCrypt를 이용한 비밀번호 암호화
 
-### 3. 중복 로그인 방지
+### 4. 중복 로그인 방지
 - 새로운 기기에서 로그인 시 기존 세션 자동 만료
 - Redis에 저장된 토큰과 요청 토큰 비교 검증
 
-### 4. 좌석 상태 관리
+### 5. 좌석 상태 관리
 | 상태 | 설명 |
 |:---|:---|
 | `AVAILABLE` | 예매 가능 |
 | `TEMPORARY` | 임시 점유 (결제 대기) |
 | `SOLD` | 판매 완료 |
 
-### 5. 예매 시간 제어
+### 6. 실시간 좌석 업데이트
+- WebSocket(STOMP)을 통한 좌석 상태 실시간 브로드캐스트
+- 다른 사용자의 좌석 선택/예약/취소 즉시 반영
+
+### 7. 예매 시간 제어
 - `bookingAvailableAt` 필드를 통한 예매 오픈 시간 관리
 - 오픈 전에는 예매 버튼 비활성화
+
+---
+
+## 시스템 흐름도
+
+### 대기열 → 좌석 예약 플로우
+```
+[예매하기 클릭]
+       ↓
+[/api/queue/enter 호출]
+       ↓
+┌──────────────────────────────┐
+│ 현재 Active < 1,000명?       │
+├──────────────────────────────┤
+│ YES → 즉시 READY + 토큰 발급  │
+│ NO  → WAITING 상태로 대기열   │
+└──────────────────────────────┘
+       ↓ (WAITING인 경우)
+[queue.html - WebSocket 구독]
+       ↓
+[스케줄러가 1초마다 처리]
+       ↓
+[순번 도달 시 READY + 토큰 발급]
+       ↓
+[seat-select.html로 자동 이동]
+       ↓
+[좌석 예약 시 X-Entry-Token 검증]
+       ↓
+[Optimistic Lock으로 동시성 제어]
+```
 
 ---
 
@@ -89,6 +131,11 @@
 | GET | `/api/concerts/{id}` | 공연 단건 조회 | X |
 | GET | `/api/concerts/{id}/schedules` | 공연 일정 목록 조회 | X |
 
+### 일정 (Schedules)
+| Method | Endpoint | Description | Auth |
+|:---|:---|:---|:---:|
+| GET | `/api/schedules/{scheduleId}` | 일정 상세 조회 (공연 정보 포함) | X |
+
 ### 좌석 (Seats)
 | Method | Endpoint | Description | Auth |
 |:---|:---|:---|:---:|
@@ -96,6 +143,21 @@
 | POST | `/api/seats/{seatId}/reserve` | 좌석 예약 (임시 점유) | O |
 | POST | `/api/seats/{seatId}/confirm` | 결제 완료 | O |
 | POST | `/api/seats/{seatId}/cancel` | 예약 취소 | O |
+
+### 대기열 (Queue)
+| Method | Endpoint | Description | Auth |
+|:---|:---|:---|:---:|
+| POST | `/api/queue/enter` | 대기열 등록 | O |
+| GET | `/api/queue/status` | 대기 상태 조회 | O |
+| POST | `/api/queue/exit` | 대기열 이탈 | O |
+| GET | `/api/queue/token/validate` | 입장 토큰 검증 | O |
+
+### WebSocket Endpoints
+| Endpoint | Description |
+|:---|:---|
+| `/ws` | WebSocket 연결 (SockJS) |
+| `/topic/seats/{scheduleId}` | 좌석 상태 실시간 구독 |
+| `/topic/queue/{scheduleId}` | 대기열 업데이트 실시간 구독 |
 
 ---
 
@@ -105,7 +167,7 @@
 
 ---
 
-## 데이터베이스 상세 명
+## 데이터베이스 상세 명세
 
 ### 1. `users` (사용자)
 | 컬럼명 | 타입 | 제약 조건 | 설명 |
@@ -144,6 +206,14 @@
 | **status** | `VARCHAR(20)` | Default | 좌석 상태 (AVAILABLE, TEMPORARY, SOLD) |
 | **user_id** | `BIGINT` | Nullable | 예약한 사용자 ID |
 | **version** | `BIGINT` | Default | 낙관적 락킹용 버전 |
+
+### Redis 데이터 구조 (대기열)
+| Key Pattern | Type | Description |
+|:---|:---|:---|
+| `queue:waiting:{scheduleId}` | Sorted Set | 대기 중인 사용자 (score: 등록시간) |
+| `queue:active:{scheduleId}` | Sorted Set | 입장한 사용자 (score: 만료시간) |
+| `entry-token:{scheduleId}:{userId}` | String | 입장 토큰 (TTL: 5분) |
+| `queue:active-schedules` | Set | 활성화된 스케줄 ID 목록 |
 
 ---
 
@@ -205,9 +275,10 @@ src/main/java/com/ticket/
 │   ├── user/          # 회원 도메인
 │   ├── auth/          # 인증 도메인
 │   ├── concert/       # 공연/일정 도메인
-│   └── seat/          # 좌석 도메인
+│   ├── seat/          # 좌석 도메인
+│   └── queue/         # 대기열 도메인
 ├── global/
-│   ├── config/        # 설정 (Security, Redis, Swagger)
+│   ├── config/        # 설정 (Security, Redis, WebSocket, Swagger, Queue)
 │   ├── security/      # JWT, 인증 필터
 │   └── exception/     # 예외 처리
 └── ConcertTicketingBeApplication.java
@@ -244,6 +315,22 @@ http://localhost:8080/swagger-ui/index.html
 
 ---
 
+## 설정값
+
+### application.properties
+```properties
+# 대기열 설정
+queue.max-active-users=1000        # 동시 입장 최대 인원
+queue.entry-token-ttl-seconds=300  # 입장 토큰 유효시간 (5분)
+queue.scheduler-interval-ms=1000   # 스케줄러 실행 간격 (1초)
+
+# JWT 설정
+jwt.access-token-expiration=1800000   # Access Token (30분)
+jwt.refresh-token-expiration=604800000 # Refresh Token (7일)
+```
+
+---
+
 ## 테스트 실행
 ```bash
 ./gradlew test
@@ -265,9 +352,10 @@ GitHub Actions를 통한 자동 빌드 및 테스트
 ## 향후 계획
 
 - [ ] 결제 시스템 연동
-- [ ] 대기열 시스템 도입
 
 ### 완료
 - [x] 좌석 선택 UI 구현
 - [x] 부하 테스트 (JMeter)
 - [x] 19,000명 동시 요청 테스트
+- [x] 대기열 시스템 도입
+- [x] WebSocket 실시간 업데이트
