@@ -97,13 +97,13 @@ class SeatConcurrencyTest {
 
             executorService.submit(() -> {
                 try {
-                    seatService.reserveSeat(testSeatId, userId);
+                    seatService.reserveSeat(testSeatId, userId, "test-token"); // 수정 - 더미 토큰 추가
                     successCount.incrementAndGet(); // 성공 시 +1
                 } catch (Exception e) {
                     failCount.incrementAndGet(); // 실패 시 +1;
                     System.out.println("예약 실패 [userId=" + userId + "]: " + e.getMessage());
                 } finally {
-                    latch.countDown();  // 작업 완료 신호 (100 → 99 → 98 → ... → 0)
+                    latch.countDown();
                 }
             });
         }
